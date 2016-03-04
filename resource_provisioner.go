@@ -81,15 +81,17 @@ func (r *ResourceProvisioner) Apply(
 	}
 
 	// Execute the package
-	pkg_resp, err := client.Server.ExecutePackage(package_exec_spec, server_id)
-	if err != nil || !pkg_resp.IsQueued {
+	// TODO: Is this a bit hacky just picking the first array entry?
+	resp, err := client.Server.ExecutePackage(package_exec_spec, server_id)
+	if err != nil || !resp[0].IsQueued {
 		return fmt.Errorf("Failed executing package: %v", err)
 	}
 
 	// Check status
-	ok, st := pkg_resp.GetStatusID()
+	// TODO: Is this a bit hacky just picking the first array entry?
+	ok, st := resp[0].GetStatusID()
 	if !ok {
-		return fmt.Errorf("Failed extracting status to poll on %v: %v", pkg_resp, err)
+		return fmt.Errorf("Failed extracting status to poll on %v: %v", resp, err)
 	}
 	err = waitStatus(client, st)
 	if err != nil {
