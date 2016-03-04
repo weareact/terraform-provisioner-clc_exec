@@ -39,6 +39,8 @@ func (r *ResourceProvisioner) Apply(
 	// fmt.Printf("InstanceState: %# v", pretty.Formatter(s))
 	pretty.Log(s)
 
+	var err error
+
 	// Decode the raw config for this provisioner
 	p, err := r.decodeConfig(c)
 	if err != nil {
@@ -58,17 +60,17 @@ func (r *ResourceProvisioner) Apply(
 	o.Output(fmt.Sprintf("Executing package '%s' on server '%s'", p.Package, server_id))
 
 	// Create a CLC config
-	config, config_err := api.NewConfig(p.Username, p.Password, p.Account, "")
-	if config_err != nil {
-		return fmt.Errorf("Failed to create CLC config with provided details: %v", config_err)
+	config, err := api.NewConfig(p.Username, p.Password, p.Account, "")
+	if err != nil {
+		return fmt.Errorf("Failed to create CLC config with provided details: %v", err)
 	}
 
 	// Create a new CLC Client
 	client := clc.New(config)
 
 	// Make sure we can authentication
-	auth_err := client.Authenticate()
-	if auth_err != nil {
+	err = client.Authenticate()
+	if err != nil {
 		return fmt.Errorf("Failed authenticated with provided credentials: %v", err)
 	}
 
@@ -79,15 +81,15 @@ func (r *ResourceProvisioner) Apply(
 	}
 
 	// Execute the package
-	pkg_resp, pkg_err := client.Server.ExecutePackage(package_exec_spec, server_id)
-	if pkg_err != nil || !pkg_resp.IsQueued {
-		return fmt.Errorf("Failed executing package: %v", pkg_err)
+	pkg_resp, err := client.Server.ExecutePackage(package_exec_spec, server_id)
+	if err != nil || !pkg_resp.IsQueued {
+		return fmt.Errorf("Failed executing package: %v", err)
 	}
 
 	// Check status
 	ok, st := pkg_resp.GetStatusID()
 	if !ok {
-		return fmt.Errorf("Failed extracting status to poll on %v: %v", pkg_resp, pkg_err)
+		return fmt.Errorf("Failed extracting status to poll on %v: %v", pkg_resp, err)
 	}
 	err = waitStatus(client, st)
 	if err != nil {
