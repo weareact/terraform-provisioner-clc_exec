@@ -126,7 +126,7 @@ func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string
 		pretty.Log(err)
 
 		// Populate c from env variables
-		c = getEnv(c)
+		getEnv(c)
 
 		// Revalidate
 		log.Print("Revalidating...")
@@ -156,7 +156,7 @@ func (r *ResourceProvisioner) decodeConfig(c *terraform.ResourceConfig) (*Provis
 	}
 
 	// Populate c from env variables
-	c = getEnv(c)
+	getEnv(c)
 
 	log.Print("ResourceConfig looks like:")
 	pretty.Log(c)
@@ -195,7 +195,7 @@ func waitStatus(client *clc.Client, id string) error {
 	return nil
 }
 
-func getEnv(c *terraform.ResourceConfig) *terraform.ResourceConfig {
+func getEnv(c *terraform.ResourceConfig) {
 	// Need to grab Env variables then...
 	envVars := map[string]string{
 		"CLC_USERNAME": "username",
@@ -207,13 +207,11 @@ func getEnv(c *terraform.ResourceConfig) *terraform.ResourceConfig {
 		if v := os.Getenv(env); v != "" {
 			log.Printf("Got a value for env '%s': %s", env, v)
 			// Set the config value in ResourceConfig
-			(*c).Raw[config] = v
-			(*c).Config[config] = v
+			c.Raw[config] = v
+			c.Config[config] = v
 		}
 	}
 	log.Print("Tweaked ResourceConfig looks like:")
 	pretty.Log(c)
-
-	return c
 
 }
