@@ -106,6 +106,8 @@ func (r *ResourceProvisioner) Apply(
 
 func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string, es []error) {
 	log.Print("Got to Validate for clc_exec")
+	log.Print("Initial ResourceConfig looks like:")
+	pretty.Log(c)
 
 	v := &config.Validator{
 		Required: []string{
@@ -123,23 +125,11 @@ func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string
 		pretty.Log(wrn)
 		pretty.Log(err)
 
-		// Need to grab Env variables then...
-		envVars := map[string]string{
-			"CLC_USERNAME": "username",
-			"CLC_PASSWORD": "password",
-			"CLC_ACCOUNT":  "account",
-		}
-
-		for env, config := range envVars {
-			if v := os.Getenv(env); v != "" {
-				log.Printf("Got a value for env '%s': %s", env, v)
-				(*c).Config[config] = v
-			}
-		}
-		log.Print("Tweaked ResourceConfig looks like:")
-		pretty.Log(c)
+		// Populate c from env variables
+		c = getEnv(c)
 
 		// Revalidate
+		log.Print("Revalidating...")
 		return v.Validate(c)
 	} else {
 		// No issues
@@ -151,9 +141,6 @@ func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string
 
 func (r *ResourceProvisioner) decodeConfig(c *terraform.ResourceConfig) (*Provisioner, error) {
 	log.Print("Got to decodeConfig for clc_exec")
-
-	log.Print("ResourceConfig looks like:")
-	pretty.Log(c)
 
 	p := new(Provisioner)
 
@@ -167,6 +154,12 @@ func (r *ResourceProvisioner) decodeConfig(c *terraform.ResourceConfig) (*Provis
 	if err != nil {
 		return nil, err
 	}
+
+	// Populate c from env variables
+	c = getEnv(c)
+
+	log.Print("ResourceConfig looks like:")
+	pretty.Log(c)
 
 	m := make(map[string]interface{})
 	for k, v := range c.Raw {
@@ -200,4 +193,27 @@ func waitStatus(client *clc.Client, id string) error {
 		return fmt.Errorf("unsuccessful job %v failed with status: %v", id, status.Status)
 	}
 	return nil
+}
+
+func getEnv(c *terraform.ResourceConfig) *terraform.ResourceConfig {
+	// Need to grab Env variables then...
+	envVars := map[string]string{
+		"CLC_USERNAME": "username",
+		"CLC_PASSWORD": "password",
+		"CLC_ACCOUNT":  "account",
+	}
+
+	for env, config := range envVars {
+		if v := os.Getenv(env); v != "" {
+			log.Printf("Got a value for env '%s': %s", env, v)
+			// Set the config value in ResourceConfig
+			(*c).Raw[config] = v
+			(*c).Config[config] = v
+		}
+	}
+	log.Print("Tweaked ResourceConfig looks like:")
+	pretty.Log(c)
+
+	return c
+
 }
