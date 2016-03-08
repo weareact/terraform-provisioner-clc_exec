@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/hashicorp/terraform/helper/config"
 	"github.com/hashicorp/terraform/terraform"
@@ -114,7 +115,38 @@ func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string
 			"parameters.*",
 		},
 	}
-	return v.Validate(c)
+
+	wrn, err := v.Validate(c)
+
+	if len(wrn) > 0 || len(err) > 0 {
+		log.Print("Got some errors returned from Validate")
+		pretty.Log(wrn)
+		pretty.Log(err)
+
+		// Need to grab Env variables then...
+		envVars := map[string]string{
+			"CLC_USERNAME": "username",
+			"CLC_PASSWORD": "password",
+			"CLC_ACCOUNT":  "account",
+		}
+
+		for env, config := range envVars {
+			if v := os.Getenv(env); v != "" {
+				log.Printf("Got a value for env '%s': %s", env, v)
+				(*c).Config[config] = v
+			}
+		}
+		log.Print("Tweaked ResourceConfig looks like:")
+		pretty.Log(c)
+
+		// Revalidate
+		return v.Validate(c)
+	} else {
+		// No issues
+		log.Print("No issues with ResourceConfig, returning...")
+		return
+	}
+
 }
 
 func (r *ResourceProvisioner) decodeConfig(c *terraform.ResourceConfig) (*Provisioner, error) {
