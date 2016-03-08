@@ -32,9 +32,9 @@ func (r *ResourceProvisioner) Apply(
 	s *terraform.InstanceState,
 	c *terraform.ResourceConfig) error {
 
-	log.Printf("Got to Apply for clc_exec provisioner")
+	log.Print("Got to Apply for clc_exec provisioner")
 
-	log.Printf("InstanceState looks like:")
+	log.Print("InstanceState looks like:")
 	// fmt.Printf("%+v\n", s)
 	// fmt.Printf("InstanceState: %# v", pretty.Formatter(s))
 	pretty.Log(s)
@@ -104,6 +104,8 @@ func (r *ResourceProvisioner) Apply(
 }
 
 func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string, es []error) {
+	log.Print("Got to Validate for clc_exec")
+
 	v := &config.Validator{
 		Required: []string{
 			"username", "password", "account", "package",
@@ -116,7 +118,7 @@ func (r *ResourceProvisioner) Validate(c *terraform.ResourceConfig) (ws []string
 }
 
 func (r *ResourceProvisioner) decodeConfig(c *terraform.ResourceConfig) (*Provisioner, error) {
-	log.Printf("Got to decodeConfig for clc_exec")
+	log.Print("Got to decodeConfig for clc_exec")
 
 	log.Print("ResourceConfig looks like:")
 	pretty.Log(c)
