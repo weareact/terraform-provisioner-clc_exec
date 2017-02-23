@@ -4,8 +4,8 @@ A Terraform provisioner for CenturyLinkCloud (CLC) packages.
 
 ## Installation
 
-1. Download the plugin from the releases tab - TBC
-2. Put it somewhere on your PATH or note the full path to the binary.
+1. Download the plugin from the releases tab - https://github.com/fatmcgav/terraform-provisioner-clc_exec/releases/download/0.0.1/terraform-provisioner-clc_exec-0.0.1.tar.gz
+2. Extract it somewhere on your PATH or note the full path to the binary.
 3. Create or modify your `~/.terraformrc` file. You will need to add the `clc_exec` path within the `provisioner` section. E.g:
 ```
 provisioners {
