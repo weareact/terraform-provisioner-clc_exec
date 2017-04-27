@@ -1,4 +1,4 @@
-PROJ = terraform-provisioner-clc
+PROJ = terraform-provisioner-clc_exec
 VERSION=0.0.1
 
 ARCHS = amd64
