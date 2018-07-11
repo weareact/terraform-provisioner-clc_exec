@@ -62,7 +62,7 @@ func applyFn(ctx context.Context) error {
 	// Get required config items
 	username := data.Get("username").(string)
 	password := data.Get("password").(string)
-	account := data.Get("account").(string)
+	//account := data.Get("account").(string)
 	packageUUID := data.Get("package").(string)
 	o.Output(fmt.Sprintf("Username = %s, Password = %s, PackageUUID = %s", username, password, packageUUID))
 
@@ -81,7 +81,7 @@ func applyFn(ctx context.Context) error {
 	o.Output(fmt.Sprintf("ParametersRaw = %+v, Processed = %+v", parametersRaw, parameters))
 
 	// Create a CLC config
-	config, err := api.NewConfig(username, password, account, "")
+	config, err := api.NewConfig(username, password)
 	if err != nil {
 		return fmt.Errorf("Failed to create CLC config with provided details: %v", err)
 	}
